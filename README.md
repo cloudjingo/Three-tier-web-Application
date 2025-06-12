@@ -4,9 +4,7 @@
 
 This project demonstrates deploying a 3-tier web application architecture in a **single AWS Availability Zone** using only **EC2 instances**, including the database tier without relying on managed services like RDS. It covers network design, security group configuration, and software setup on the instances.
 
-## Architecture Diagram
 
-![Architecture Diagram](docs/architecture-diagram.png)
 
 ---
 
@@ -17,7 +15,7 @@ This project demonstrates deploying a 3-tier web application architecture in a *
 | Cloud Provider   | AWS EC2, VPC, NAT Gateway           |
 | Operating System | Amazon Linux 2023 AMI                |
 | Database         | PostgreSQL 15 (installed on EC2)    |
-| Web Server       | Apache / Nginx                      |
+| Web Server       | Nginx                      |
 | Security         | AWS Security Groups                 |
 | Networking       | VPC, Subnets, NAT Gateway          |
 
