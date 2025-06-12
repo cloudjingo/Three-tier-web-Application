@@ -11,7 +11,7 @@ sudo /usr/bin/postgresql-setup --initdb
 sudo systemctl enable postgresql
 sudo systemctl start postgresql
 
-# Allow remote connections from App tier subnet (replace with your subnet)
+# Allow remote connections from App tier subnet 
 PG_HBA_CONF="/var/lib/pgsql/data/pg_hba.conf"
 POSTGRESQL_CONF="/var/lib/pgsql/data/postgresql.conf"
 
@@ -29,4 +29,4 @@ sudo sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" $POSTGRE
 sudo systemctl restart postgresql
 
 echo "PostgreSQL installation and configuration complete."
-echo "Remember to create your database and user."
+

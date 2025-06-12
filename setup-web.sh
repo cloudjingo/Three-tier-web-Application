@@ -10,7 +10,7 @@ sudo dnf install -y httpd
 sudo systemctl enable httpd
 sudo systemctl start httpd
 
-# Set up a simple proxy (adjust IP to your App instance private IP)
+# Set up a simple proxy 
 cat << EOF | sudo tee /etc/httpd/conf.d/app_proxy.conf
 ProxyPreserveHost On
 ProxyPass /api http://10.0.2.10:3000/api
