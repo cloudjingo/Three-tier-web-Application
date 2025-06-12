@@ -78,7 +78,5 @@ This project demonstrates deploying a 3-tier web application architecture in a *
 - Validate security group rules by confirming restricted access from unauthorized IPs.
 
 
----
 
-## Repository Structure
 
