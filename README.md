@@ -1,92 +1,86 @@
-# 3-Tier Web Application Deployment on AWS with PostgreSQL
+# Single AZ 3-Tier Web Application Deployment on AWS Using EC2 Database
 
-## Overview
+## Project Overview
 
-This project deploys a simple 3-tier web application on AWS EC2 instances, using a PostgreSQL database in a private subnet. The setup includes proper networking, security, and package management on Amazon Linux.
+This project demonstrates deploying a 3-tier web application architecture in a **single AWS Availability Zone** using only **EC2 instances**, including the database tier without relying on managed services like RDS. It covers network design, security group configuration, and software setup on the instances.
 
----
+## Architecture Diagram
 
-## AWS Resources Created
-
-- **VPC** with:
-  - Public subnet (for NAT Gateway)
-  - Private subnet (for Application and Database servers)
-- **NAT Gateway** for internet access to private subnet instances
-- **EC2 Instances**:
-  - Web server (public subnet)
-  - Application server (private subnet)
-  - Database server (PostgreSQL, private subnet)
-- **Security Groups**:
-  - DB SG: allows inbound PostgreSQL (port 5432) from App server subnet only
-  - App SG: allows inbound traffic from Web server subnet
-  - Web SG: allows HTTP/HTTPS inbound from internet; SSH from your IP
+![Architecture Diagram](docs/architecture-diagram.png)
 
 ---
 
-## Tools Used
+## Tools and Technologies
 
-- Amazon Linux 2023 AMI on EC2 instances
-- `dnf` package manager for software installation
-- PostgreSQL 15 installed from PostgreSQL official yum repository
-- `systemd` for service management
-- AWS Systems Manager Session Manager or Bastion host for secure SSH access to private instances
-
----
-
-## Setup Summary
-
-1. Disable default PostgreSQL module to avoid conflicts:
-
-   ```bash
-   sudo dnf -qy module disable postgresql
-   ```
-
-2. Add PostgreSQL 15 official repository by creating `/etc/yum.repos.d/pgdg.repo` with:
-
-   ```
-   [pgdg15]
-   name=PostgreSQL 15 for RHEL 9 - x86_64
-   baseurl=https://download.postgresql.org/pub/repos/yum/15/redhat/rhel-9-x86_64
-   enabled=1
-   gpgcheck=0
-   ```
-
-3. Install PostgreSQL 15 server and contrib packages:
-
-   ```bash
-   sudo dnf install -y postgresql15-server postgresql15-contrib
-   ```
-
-4. Initialize and start PostgreSQL service:
-
-   ```bash
-   sudo /usr/pgsql-15/bin/postgresql-15-setup initdb
-   sudo systemctl enable --now postgresql-15
-   ```
-
-5. Configure PostgreSQL for remote access:
-   - Set `listen_addresses = '*'` in `postgresql.conf`
-   - Allow App subnet CIDR in `pg_hba.conf` with `md5` authentication
-   - Reload PostgreSQL service
-
-6. Create your database and user with proper permissions.
-
-7. Configure Security Groups to restrict traffic:
-   - DB SG: inbound port 5432 from App subnet only
-   - App SG: inbound from Web server subnet
-   - Web SG: inbound HTTP/HTTPS from Internet; SSH from your IP only
-
-8. Access private subnet instances securely using:
-   - AWS Systems Manager Session Manager OR
-   - Bastion host in public subnet
+| Category         | Tools/Services Used                  |
+|------------------|------------------------------------|
+| Cloud Provider   | AWS EC2, VPC, NAT Gateway           |
+| Operating System | Amazon Linux 2023 AMI                |
+| Database         | PostgreSQL 15 (installed on EC2)    |
+| Web Server       | Apache / Nginx                      |
+| Security         | AWS Security Groups                 |
+| Networking       | VPC, Subnets, NAT Gateway          |
 
 ---
 
-## Notes
+## Components and Resources
 
-- The NAT Gateway allows private subnet instances internet access without public IPs.
-- PostgreSQL is installed manually because Amazon Linux 2023 does not have compatible default repos.
-- Security Group rules ensure minimal exposure of services.
-- AWS Systems Manager Session Manager is preferred for private instance access due to security.
+| Resource Type    | Description                                         |
+|------------------|-----------------------------------------------------|
+| EC2 Instances    | Three instances for Web, Application, and Database tiers |
+| Security Groups  | Firewall rules restricting and allowing traffic between tiers |
+| VPC & Subnets    | Custom VPC with designated subnets for isolation    |
+| NAT Gateway      | Allows private subnet internet access                |
 
+---
+
+## Deployment Steps
+
+### Step 1: EC2 Instances Provisioning
+
+- Launch three EC2 instances in the same AWS Availability Zone.
+- Assign appropriate security groups to each instance (Web, App, DB).
+
+### Step 2: Database Setup (PostgreSQL)
+
+- SSH into the database EC2 instance.
+- Run `scripts/setup-db.sh` to install and configure PostgreSQL 15.
+- Configure PostgreSQL to accept connections only from the Application tier.
+
+### Step 3: Application Layer Setup
+
+- SSH into the application EC2 instance.
+- Run `scripts/setup-app.sh` to deploy the backend application.
+- Configure the app to connect securely to the PostgreSQL database using the DB instance’s private IP.
+
+### Step 4: Web Server Configuration
+
+- SSH into the web EC2 instance.
+- Run `scripts/setup-web.sh` to install and configure Apache or Nginx.
+- Set up the web server to serve static frontend content and proxy backend API requests to the App instance.
+
+---
+
+## Networking and Security
+
+- All instances are deployed within the same VPC and Availability Zone.
+- Security Groups are configured to strictly allow only necessary inbound and outbound traffic:
+  - Web SG: HTTP/HTTPS traffic from the internet.
+  - App SG: Accepts traffic only from the Web SG.
+  - DB SG: Accepts database port traffic only from the App SG.
+- NAT Gateway configured for private subnet instances requiring outbound internet access.
+
+---
+
+## Testing and Validation
+
+- Verify connectivity between Web and App tiers via private IP.
+- Test App to Database connection on port 5432.
+- Access the web application from a browser using the public IP or domain name assigned to the Web tier.
+- Validate security group rules by confirming restricted access from unauthorized IPs.
+
+
+---
+
+## Repository Structure
 
